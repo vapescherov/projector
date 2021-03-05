@@ -28,9 +28,9 @@ public class Main {
 
         Race race = raceFromFile(argumentParser.getAsString("-r", "--race"));
         CarLocationProvider carLocationProvider = carLocationProviderFromFile(argumentParser.getAsString("-l", "--locations"));
-        ProjectionCalculator projectionCalculator = new ProjectionCalculatorImpl();
+        ProjectionCalculator projectionCalculator = new ProjectionCalculatorImpl(race);
 
-        ProjectionService projectionService = new ProjectionServiceImpl(race, carLocationProvider, projectionCalculator);
+        ProjectionService projectionService = new ProjectionServiceImpl(carLocationProvider, projectionCalculator);
 
         Stream<ProjectionPair> projections = projectionService.getProjections();
 

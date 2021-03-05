@@ -1,12 +1,14 @@
 package org.example.projector.service;
 
 import org.example.projector.model.MovingPoint;
+import org.example.projector.model.Race;
 import org.example.projector.model.geom.LineSegment;
 import org.example.projector.model.geom.Point;
 import org.example.projector.model.geom.PolarVector;
 import org.example.projector.model.geom.Vector;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static java.util.Comparator.comparingDouble;
 
@@ -16,16 +18,26 @@ public class ProjectionCalculatorImpl implements ProjectionCalculator {
     private static final double ANGLE_IMPORTANCE_MULTIPLIER = 0.25;
     private static final int MAX_POSITION_LENGTH_ERROR = 100;
 
-    @Override
-    public Point findProjection(List<LineSegment> segments, MovingPoint carPoint) {
-        return segments.stream()
-                .map(segment -> calculateSegmentStats(carPoint, segment))
-                .max(comparingDouble(segmentStats -> calculateStatsCoefficient(segmentStats.stats)))
-                .map(segmentStats -> segmentStats.projection)
-                .orElseThrow();
+    private final List<LineSegment> segments;
+
+    private int lastIndex;
+
+    public ProjectionCalculatorImpl(Race race) {
+        this.segments = race.getSegments();
+        this.lastIndex = 0;
     }
 
-    private SegmentStats calculateSegmentStats(MovingPoint carPoint, LineSegment segment) {
+    @Override
+    public Point findProjection(MovingPoint carPoint) {
+        SegmentStats bestSegmentStats = IntStream.range(lastIndex, segments.size())
+                .mapToObj(index -> calculateSegmentStats(carPoint, segments.get(index), index - lastIndex))
+                .max(comparingDouble(segmentStats -> calculateStatsCoefficient(segmentStats.stats)))
+                .orElseThrow();
+        lastIndex += bestSegmentStats.stats.index;
+        return bestSegmentStats.projection;
+    }
+
+    private SegmentStats calculateSegmentStats(MovingPoint carPoint, LineSegment segment, int index) {
         Point carCoordinates = carPoint.getCoordinates();
         Point projection = calculateProjection(carCoordinates, segment);
         double squareLength = Vector.betweenPoints(projection, carCoordinates).squareLength();
@@ -33,13 +45,23 @@ public class ProjectionCalculatorImpl implements ProjectionCalculator {
         PolarVector carVector = carPoint.getVector();
         double angleDiff = calculateAngle(carVector.getAngle(), segment);
 
-        return new SegmentStats(projection, new Stats(squareLength, angleDiff));
+        return new SegmentStats(projection, new Stats(squareLength, angleDiff, index));
     }
 
     private double calculateStatsCoefficient(Stats stats) {
+        // TODO: normalize coefficients
         double lengthCoefficient = calculateLengthCoefficient(stats.squareLength);
         double angleCoefficient = calculateAngleCoefficient(stats.angleDiff);
-        return lengthCoefficient * angleCoefficient;
+        double indexCoefficient = calculateIndexCoefficient(stats.index);
+        return lengthCoefficient * angleCoefficient * indexCoefficient;
+    }
+
+    private double calculateIndexCoefficient(int index) {
+        // TODO: use segment length sum starting from last point instead
+        if (index > 0 && index < 3) {
+            index--;
+        }
+        return 1. / Math.pow(1.1, index);
     }
 
     private double calculateAngleCoefficient(double angleDiff) {
@@ -79,10 +101,12 @@ public class ProjectionCalculatorImpl implements ProjectionCalculator {
     private static class Stats {
         private final double squareLength;
         private final double angleDiff;
+        private final int index;
 
-        private Stats(double squareLength, double angleDiff) {
+        private Stats(double squareLength, double angleDiff, int index) {
             this.squareLength = squareLength;
             this.angleDiff = angleDiff;
+            this.index = index;
         }
     }
 
