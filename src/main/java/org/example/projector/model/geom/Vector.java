@@ -41,4 +41,9 @@ public class Vector {
         return vector.scale(coefficient);
     }
 
+    public double getAngle() {
+        double angle = Math.toDegrees(Math.atan2(y, x));
+        return angle < 0 ? 360 + angle : angle;
+    }
+
 }

@@ -13,10 +13,12 @@ public class RaceMap extends JComponent {
 
     private final Race race;
     private final List<ProjectionPair> projections;
+    private final int height;
 
-    public RaceMap(Race race, List<ProjectionPair> projections) {
+    public RaceMap(Race race, List<ProjectionPair> projections, int height) {
         this.race = race;
         this.projections = projections;
+        this.height = height;
     }
 
     @Override
@@ -27,15 +29,23 @@ public class RaceMap extends JComponent {
                 .map(seg -> toLine(seg.getP1(), seg.getP2()))
                 .forEach(g2::draw);
 
-        g.setColor(Color.RED);
-
-        projections.stream()
-                .map(projectionPair -> toLine(projectionPair.getCarPoint().getCoordinates(), projectionPair.getProjection()))
-                .forEach(g2::draw);
+        g2.setColor(Color.RED);
+        for (int i = 0; i < projections.size(); i++) {
+            ProjectionPair projectionPair = projections.get(i);
+            Point carCoordinates = projectionPair.getCarPoint().getCoordinates();
+            g2.draw(toLine(carCoordinates, projectionPair.getProjection()));
+            g2.drawString(String.valueOf(i + 1),
+                    Double.valueOf(carCoordinates.getX() + 5).floatValue(),
+                    Double.valueOf(fixY(carCoordinates.getY() + 5)).floatValue());
+        }
     }
 
-    private static Line2D.Double toLine(Point p1, Point p2) {
-        return new Line2D.Double(p1.getX(), p1.getY(), p2.getX(), p2.getY());
+    private Line2D.Double toLine(Point p1, Point p2) {
+        return new Line2D.Double(p1.getX(), fixY(p1.getY()), p2.getX(), fixY(p2.getY()));
+    }
+
+    private double fixY(double y) {
+        return height - y;
     }
 
 }

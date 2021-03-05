@@ -34,12 +34,14 @@ public class Main {
 
         Stream<ProjectionPair> projections = projectionService.getProjections();
 
+        List<ProjectionPair> projectionsList = projections.collect(toList());
         EventQueue.invokeLater(() -> {
             var frame = new JFrame();
-            frame.setSize(1000, 1000);
+            int height = 1000;
+            frame.setSize(1000, height);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setVisible(true);
-            frame.add(new RaceMap(race, projections.collect(toList())));
+            frame.add(new RaceMap(race, projectionsList, height));
         });
     }
 
