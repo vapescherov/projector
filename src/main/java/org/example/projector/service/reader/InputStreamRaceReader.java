@@ -10,11 +10,17 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RaceReaderImpl implements RaceReader {
+public class InputStreamRaceReader implements RaceReader {
+
+    private final InputStream inputStream;
+
+    public InputStreamRaceReader(InputStream inputStream) {
+        this.inputStream = inputStream;
+    }
 
     @Override
-    public Race read(InputStream is) {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+    public Race read() {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             List<Point> points = new ArrayList<>();
             String line;
             while ((line = reader.readLine()) != null) {

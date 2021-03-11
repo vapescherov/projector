@@ -11,11 +11,17 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CarLocationReaderImpl implements CarLocationReader {
+public class InputStreamCarLocationReader implements CarLocationReader {
+
+    private final InputStream inputStream;
+
+    public InputStreamCarLocationReader(InputStream inputStream) {
+        this.inputStream = inputStream;
+    }
 
     @Override
-    public List<MovingPoint> read(InputStream is) {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+    public List<MovingPoint> read() {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             List<MovingPoint> points = new ArrayList<>();
             String line;
             while ((line = reader.readLine()) != null) {

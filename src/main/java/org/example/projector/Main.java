@@ -5,10 +5,9 @@ import org.example.projector.model.MovingPoint;
 import org.example.projector.model.ProjectionPair;
 import org.example.projector.model.Race;
 import org.example.projector.service.*;
-import org.example.projector.service.reader.CarLocationReader;
-import org.example.projector.service.reader.CarLocationReaderImpl;
-import org.example.projector.service.reader.RaceReader;
-import org.example.projector.service.reader.RaceReaderImpl;
+import org.example.projector.service.reader.InputStreamCarLocationReader;
+import org.example.projector.service.reader.InputStreamRaceReader;
+import org.example.projector.service.writer.OutputStreamProjectionResultWriter;
 import org.example.projector.utils.ArgumentParser;
 
 import javax.swing.*;
@@ -33,6 +32,7 @@ public class Main {
                 carLocationProviderFromFile(locationsPath), new ProjectionCalculatorImpl(race));
 
         List<ProjectionPair> projections = projectionService.getProjections();
+        printProjections(projections);
 
         if (showGui) {
             EventQueue.invokeLater(() -> showGui(race, projections));
@@ -49,14 +49,16 @@ public class Main {
     }
 
     private static Race raceFromFile(String filename) throws FileNotFoundException {
-        RaceReader raceReader = new RaceReaderImpl();
-        return raceReader.read(new FileInputStream(filename));
+        return new InputStreamRaceReader(new FileInputStream(filename)).read();
     }
 
     private static CarLocationProvider carLocationProviderFromFile(String filename) throws FileNotFoundException {
-        CarLocationReader locationReader = new CarLocationReaderImpl();
-        List<MovingPoint> movingPoints = locationReader.read(new FileInputStream(filename));
+        List<MovingPoint> movingPoints = new InputStreamCarLocationReader(new FileInputStream(filename)).read();
         return new ListCarLocationProvider(movingPoints);
+    }
+
+    private static void printProjections(List<ProjectionPair> projections) {
+        new OutputStreamProjectionResultWriter(System.out).write(projections);
     }
 
 }
