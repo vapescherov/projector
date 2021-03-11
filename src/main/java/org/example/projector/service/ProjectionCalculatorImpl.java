@@ -15,8 +15,12 @@ import static java.util.Comparator.comparingDouble;
 public class ProjectionCalculatorImpl implements ProjectionCalculator {
 
     private static final int MAX_ANGLE_DIFF = 180;
+
+    // adjust according to real data, depends on sensor angle error rate
     private static final double ANGLE_IMPORTANCE_MULTIPLIER = 0.25;
-    private static final int MAX_POSITION_LENGTH_ERROR = 100;
+
+    // adjust according to real data, depends on sensor max distance error
+    private static final int MAX_POSITION_DISTANCE_ERROR = 100;
 
     private final List<LineSegment> segments;
 
@@ -69,7 +73,7 @@ public class ProjectionCalculatorImpl implements ProjectionCalculator {
     }
 
     private double calculateLengthCoefficient(double squareLength) {
-        return 1 - Math.min(squareLength / (MAX_POSITION_LENGTH_ERROR * MAX_POSITION_LENGTH_ERROR), 1);
+        return 1 - Math.min(squareLength / (MAX_POSITION_DISTANCE_ERROR * MAX_POSITION_DISTANCE_ERROR), 1);
     }
 
     private static double calculateAngle(double carAngle, LineSegment segment) {

@@ -13,6 +13,9 @@ public class ListCarLocationProvider implements CarLocationProvider {
         this.points = points;
     }
 
+    /**
+     * @return stream simulating a moving car
+     */
     @Override
     public Stream<MovingPoint> asSequentialStream() {
         return points.stream().sequential();

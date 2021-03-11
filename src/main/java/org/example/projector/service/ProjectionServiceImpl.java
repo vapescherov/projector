@@ -2,7 +2,9 @@ package org.example.projector.service;
 
 import org.example.projector.model.ProjectionPair;
 
-import java.util.stream.Stream;
+import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 
 public class ProjectionServiceImpl implements ProjectionService {
 
@@ -15,9 +17,10 @@ public class ProjectionServiceImpl implements ProjectionService {
     }
 
     @Override
-    public Stream<ProjectionPair> getProjections() {
+    public List<ProjectionPair> getProjections() {
         return carLocationProvider.asSequentialStream()
-                .map(location -> new ProjectionPair(location, projectionCalculator.findProjection(location)));
+                .map(location -> new ProjectionPair(location, projectionCalculator.findProjection(location)))
+                .collect(toList());
     }
 
 }
