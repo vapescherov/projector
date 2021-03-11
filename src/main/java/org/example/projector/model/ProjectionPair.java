@@ -20,4 +20,12 @@ public class ProjectionPair {
         return projection;
     }
 
+    @Override
+    public String toString() {
+        return "ProjectionPair{" +
+                "carPoint=" + carPoint +
+                ", projection=" + projection +
+                '}';
+    }
+
 }

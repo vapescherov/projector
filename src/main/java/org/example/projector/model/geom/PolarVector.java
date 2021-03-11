@@ -1,5 +1,7 @@
 package org.example.projector.model.geom;
 
+import java.util.Objects;
+
 public class PolarVector {
 
     private final double length;
@@ -20,6 +22,27 @@ public class PolarVector {
 
     public double getAngle() {
         return angle;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PolarVector that = (PolarVector) o;
+        return Double.compare(that.length, length) == 0 && Double.compare(that.angle, angle) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(length, angle);
+    }
+
+    @Override
+    public String toString() {
+        return "PolarVector{" +
+                "length=" + length +
+                ", angle=" + angle +
+                '}';
     }
 
 }

@@ -1,5 +1,7 @@
 package org.example.projector.model.geom;
 
+import java.util.Objects;
+
 public class Vector {
 
     private final double x;
@@ -44,6 +46,24 @@ public class Vector {
     public double getAngle() {
         double angle = Math.toDegrees(Math.atan2(y, x));
         return angle < 0 ? 360 + angle : angle;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Vector vector = (Vector) o;
+        return Double.compare(vector.x, x) == 0 && Double.compare(vector.y, y) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y);
+    }
+
+    @Override
+    public String toString() {
+        return "Vector(" + x + ", " + y + ")";
     }
 
 }
