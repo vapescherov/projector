@@ -16,11 +16,11 @@ public class ProjectionCalculatorImpl implements ProjectionCalculator {
 
     private static final int MAX_ANGLE_DIFF = 180;
 
-    // adjust according to real data, depends on sensor angle error rate
-    private static final double ANGLE_IMPORTANCE_MULTIPLIER = 0.25;
-
-    // adjust according to real data, depends on sensor max distance error
-    private static final int MAX_POSITION_DISTANCE_ERROR = 100;
+    // properties below should be adjusted according to real data
+    private static final double ANGLE_IMPORTANCE_MULTIPLIER = 0.25; // depends on sensor angle error rate
+    private static final int MAX_POSITION_DISTANCE_ERROR = 100; // depends on sensor max distance error
+    private static final int SEGMENT_NUMBER_THRESHOLD = 3; // should be a bit more than average number of segments between two measures, probably could be calculated on the flight
+    private static final double FAR_SEGMENT_INDEX_COEFFICIENT = 0.8;
 
     private final List<LineSegment> segments;
 
@@ -35,6 +35,7 @@ public class ProjectionCalculatorImpl implements ProjectionCalculator {
     public Point findProjection(MovingPoint carPoint) {
         SegmentStats bestSegmentStats = IntStream.range(lastIndex, segments.size())
                 .mapToObj(index -> calculateSegmentStats(carPoint, segments.get(index), index - lastIndex))
+                // takeWhile length between point and segment increasing and more than threshold
                 .max(comparingDouble(segmentStats -> calculateStatsCoefficient(segmentStats.stats)))
                 .orElseThrow();
         lastIndex += bestSegmentStats.stats.index;
@@ -53,7 +54,6 @@ public class ProjectionCalculatorImpl implements ProjectionCalculator {
     }
 
     private double calculateStatsCoefficient(Stats stats) {
-        // TODO: normalize coefficients
         double lengthCoefficient = calculateLengthCoefficient(stats.squareLength);
         double angleCoefficient = calculateAngleCoefficient(stats.angleDiff);
         double indexCoefficient = calculateIndexCoefficient(stats.index);
@@ -61,11 +61,8 @@ public class ProjectionCalculatorImpl implements ProjectionCalculator {
     }
 
     private double calculateIndexCoefficient(int index) {
-        // TODO: use segment length sum starting from last point instead
-        if (index > 0 && index < 3) {
-            index--;
-        }
-        return 1. / Math.pow(1.1, index);
+        // TODO: try to use segment length sum starting from last point instead
+        return index < SEGMENT_NUMBER_THRESHOLD ? 1 : FAR_SEGMENT_INDEX_COEFFICIENT;
     }
 
     private double calculateAngleCoefficient(double angleDiff) {
