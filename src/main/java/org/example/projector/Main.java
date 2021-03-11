@@ -35,14 +35,20 @@ public class Main {
         Stream<ProjectionPair> projections = projectionService.getProjections();
 
         List<ProjectionPair> projectionsList = projections.collect(toList());
-        EventQueue.invokeLater(() -> {
-            var frame = new JFrame();
-            int height = 1000;
-            frame.setSize(1000, height);
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setVisible(true);
-            frame.add(new RaceMap(race, projectionsList, height));
-        });
+
+        boolean showGui = argumentParser.hasAnyFlag("--gui");
+        if (showGui) {
+            EventQueue.invokeLater(() -> showGui(race, projectionsList));
+        }
+    }
+
+    private static void showGui(Race race, List<ProjectionPair> projectionsList) {
+        JFrame frame = new JFrame();
+        int height = 1000;
+        frame.setSize(1000, height);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+        frame.add(new RaceMap(race, projectionsList, height));
     }
 
     private static Race raceFromFile(String filename) throws FileNotFoundException {

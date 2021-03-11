@@ -24,4 +24,11 @@ public class ArgumentParser {
                 .orElseThrow(() -> new NoSuchArgumentException(flags));
     }
 
+    public boolean hasAnyFlag(String... flags) {
+        return Arrays.stream(flags)
+                .map(args::containsKey)
+                .reduce(Boolean::logicalOr)
+                .orElse(Boolean.FALSE);
+    }
+
 }
